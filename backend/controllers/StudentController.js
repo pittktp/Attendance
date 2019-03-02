@@ -4,6 +4,8 @@ var ObjectId = require('mongoose').Types.ObjectId;
 
 var { Student } = require('../models/Student');
 
+var lastScannedRFID = -1;
+
 router.get('/', (req, res) => {
 
   // Gets all members in DB and sends them as a list called docs
@@ -15,6 +17,20 @@ router.get('/', (req, res) => {
       console.log('Error in Retriving Students for auth: ' + JSON.stringify(err, undefined, 2));
   });
 
+});
+
+router.post('/rfid', (req, res) => {
+  lastScannedRFID = req.body.RFID;
+  return res.status(200).send();
+})
+
+router.get('/rfid', (req, res) => {  
+  if(lastScannedRFID == -1) {
+    console.error('Invalid RFID value of: ', lastScannedRFID);
+    res.status(404).send();
+  } else {
+    return res.status(200).send({rfid: lastScannedRFID});
+  }
 });
 
 router.get('/:id', (req, res) => {
@@ -36,10 +52,11 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
 
+    console.log(lastScannedRFID);
     var student = new Student({
       name: req.body.name,
       email: req.body.email,
-      rfid: req.body.rfid
+      rfid: lastScannedRFID
     });
 
     //Actually saves to the DB
@@ -64,7 +81,7 @@ router.put('/:id', (req, res) => {
   var student = new Student({
     name: req.body.name,
     email: req.body.email,
-    rfid: req.body.rfid
+    rfid: lastScannedRFID
   });
 
   // Finds the member in the DB and updates him/her with the newly created member obj
