@@ -19,6 +19,7 @@ router.get('/', (req, res) => {
 
 });
 
+// Track rfid
 router.post('/rfid', (req, res) => {
   lastScannedRFID = req.body.RFID;
   return res.status(200).send();
