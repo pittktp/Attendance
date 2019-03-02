@@ -1,0 +1,16 @@
+
+version: '3.0' # specify docker-compose version
+
+services:
+
+  database: # name that docker-compose calls this container
+    image: mongo # downloads the vanilla image of mongo - don't need a Dockerfile for it
+    ports:
+    - "27017:27017" # specify port mapping
+
+  server: # name that docker-compose calls this container
+    build: server # the name of the directory that contains the backend
+    ports:
+    - "3000:3000" # specify port mapping
+    links:
+    - database:27017 # link this service to the database service
