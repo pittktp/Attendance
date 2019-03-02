@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const url = 'mongodb://';
+const url = 'mongodb://localhost:27017/Attendence';
 
 mongoose.connect(url, { useNewUrlParser: true}, (err) => {
   if(err) {
