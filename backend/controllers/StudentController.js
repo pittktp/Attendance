@@ -39,7 +39,7 @@ router.post('/', (req, res) => {
     var student = new Student({
       name: req.body.name,
       email: req.body.email,
-      rfid: req.body.rfid;
+      rfid: req.body.rfid
     });
 
     //Actually saves to the DB
@@ -64,7 +64,7 @@ router.put('/:id', (req, res) => {
   var student = new Student({
     name: req.body.name,
     email: req.body.email,
-    rfid: req.body.rfid;
+    rfid: req.body.rfid
   });
 
   // Finds the member in the DB and updates him/her with the newly created member obj
