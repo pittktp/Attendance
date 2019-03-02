@@ -12,7 +12,5 @@ app.listen(3000, () => console.log("Server started on port 3000"));
 
 var studentController = require('./controllers/StudentController.js');
 var courseController = require('./controllers/CourseController.js');
-var rfidController = require('./controllers/RfidController.js');
 app.use('/api/students', studentController);
 app.use('/api/courses', courseController);
-app.use('/api/rfid', rfidController);
