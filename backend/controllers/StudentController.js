@@ -24,13 +24,17 @@ router.post('/rfid', (req, res) => {
   lastScannedRFID = req.body.RFID;
 
   // Search for user with matching RFID, if found return name w/ code 200, else code 201
-  Student.findOne({rfid: lastScannedRFID}, (err, doc) => {
-    if(!err) {
-      res.status(200).send(doc.name);
-    } else {
-      res.status(201).send();
-    }
-  });  
+  if(lastScannedRFID != -1) {
+    Student.findOne({rfid: lastScannedRFID}, (err, doc) => {
+      if(!err) {
+        res.status(200).send(doc.name);
+      } else {
+        res.status(201).send();
+      }
+    });  
+  } else {
+    console.error('Invalid RFID value of: ', lastScannedRFID);
+  }
 })
 
 router.get('/rfid', (req, res) => {  
