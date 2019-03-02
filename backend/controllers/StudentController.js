@@ -22,7 +22,15 @@ router.get('/', (req, res) => {
 // Track rfid
 router.post('/rfid', (req, res) => {
   lastScannedRFID = req.body.RFID;
-  return res.status(200).send();
+
+  // Search for user with matching RFID, if found return name w/ code 200, else code 201
+  Student.findOne({rfid: lastScannedRFID}, (err, doc) => {
+    if(!err) {
+      res.status(200).send(doc.name);
+    } else {
+      res.status(201).send();
+    }
+  });  
 })
 
 router.get('/rfid', (req, res) => {  
@@ -52,23 +60,27 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
+    if(lastScannedRFID != -1) {
+      var student = new Student({
+        name: req.body.name,
+        email: req.body.email,
+        rfid: lastScannedRFID
+      });
 
-    console.log(lastScannedRFID);
-    var student = new Student({
-      name: req.body.name,
-      email: req.body.email,
-      rfid: lastScannedRFID
-    });
+      //Actually saves to the DB
+      student.save((err, doc) =>{
+        if(!err)
+          res.send(doc);
+        else {
+          console.log('Error in Student POST: ' + JSON.stringify(err, undefined, 2));
+        }
+      });
 
-    //Actually saves to the DB
-    student.save((err, doc) =>{
-      if(!err)
-        res.send(doc);
-      else {
-        console.log('Error in Student POST: ' + JSON.stringify(err, undefined, 2));
-      }
-    });
-
+      // After saving student with last scanned RFID to DB, reset lastScannedRFID to -1
+      lastScannedRFID = -1;
+    } else {
+      console.error('Invalid RFID value of: ', lastScannedRFID);
+    }
 });
 
 router.put('/:id', (req, res) => {
@@ -110,6 +122,5 @@ router.delete('/:id', (req, res) => {
       console.log('Error in Student DELETE: ' + JSON.stringify(err, undefined, 2));
   });
 });
-
 
 module.exports = router;
