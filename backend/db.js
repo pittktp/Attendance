@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 // For local database
-//const url = 'mongodb://localhost:27017/Attendence';
+const url = 'mongodb://localhost:27017/Attendence';
 
 // For local database
-const url = "mongodb://database:27017/KtpDB";
+//const url = "mongodb://database:27017/Attendance";
 
 mongoose.connect(url, { useNewUrlParser: true}, (err) => {
   if(err) {

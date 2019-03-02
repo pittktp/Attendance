@@ -5,7 +5,7 @@ const { mongoose } = require('./db.js');
 
 var app = express();
 
-app.use(cors({ origin: 'http://localhost:4200' }));
+//app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(bodyParser.json());
 
 app.listen(3000, () => console.log("Server started on port 3000"));
