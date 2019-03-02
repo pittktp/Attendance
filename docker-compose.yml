@@ -8,8 +8,8 @@ services:
     ports:
     - "27017:27017" # specify port mapping
 
-  server: # name that docker-compose calls this container
-    build: server # the name of the directory that contains the backend
+  backend: # name that docker-compose calls this container
+    build: backend # the name of the directory that contains the backend
     ports:
     - "3000:3000" # specify port mapping
     links:
