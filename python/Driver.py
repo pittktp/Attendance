@@ -1,64 +1,86 @@
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 import SimpleMFRC522
 import requests
+import time
+import json
 import sys
 
-reader = SimpleMFRC522.SimpleMFRC522()
+END_POINT = "http://ec2-18-233-40-25.compute-1.amazonaws.com:3000/api/rfid"
 
-END_POINT = "https://localhost:3000/api/rfid"
+HEADERS = {'content-type': 'application/json'}
 
 #HTTP Codes:
 SUCCESS = 200
-FAIL = 404
 
 #GPIO Pins
-red     = 16
-yellow  = 20
-green   = 21
+red     = 36
+yellow  = 35
+green   = 40
 on = GPIO.HIGH
 off = GPIO.LOW
 
 def main():
 
+    reader = SimpleMFRC522.SimpleMFRC522()
+
+
     try:
         while True:
 
-            resetLights()
+            resetLights()       #Turn on yellow light, turn off others.
+
+            print "Ready to read ID:"
 
             id = reader.read_id()     #Wait utnil RDIF ID number is read
 
-            data = {'RFID' : id}  #Creat JSON object
+            print("ID read: " + str(id))
 
-            r = requests.post(END_POINT, data)  #Use https post with the data as the req body
+            payload = json.dumps({'RFID' : id})  #Creat JSON object
 
-            handleResponce(r.status_code)
+            print "Attempting to post now...."
+
+            r = requests.post(END_POINT, data = payload, headers = HEADERS)  #Use https post with the data as the req body
+
+            print("Server returned code: " + str(r.status_code) + " " + r.reason)
+            # print(r.reason)
+
+            handleResponse(r.status_code)   #update LEDs based on responce
+
+            time.sleep(2)
+
+
     except KeyboardInterrupt:
+        print (" Ctr-C detected. Exiting gracefully...")
         pass
     finally:
         GPIO.cleanup()
+        sys.exit(0)
 
-def handleResponce(res):
-    if res == SUCCESS:
+def handleResponse(res):
+
+    if res == SUCCESS:              #Turn on green light
         GPIO.output(green, on)
         GPIO.output(yellow, off)
         GPIO.output(red, off)
+        pass
 
-    elif res == FAIL:
+    else:                           #Turn on the red light
         GPIO.output(red, on)
         GPIO.output(yellow, off)
         GPIO.output(green, off)
+        pass
+
+def resetLights():
+    GPIO.output(yellow, on)
+    GPIO.output(red, off)
+    GPIO.output(green, off)
 
 def init():
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
     GPIO.setup(red, GPIO.OUT)
     GPIO.setup(yellow, GPIO.OUT)
     GPIO.setup(green, GPIO.OUT)
-
-def resetLights():
-	GPIO.output(yellow, on)
-    GPIO.output(red, off)
-    GPIO.output(green, off)
 
 if __name__ == '__main__':
     init()
