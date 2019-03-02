@@ -3,8 +3,13 @@ var router = express.Router();
 var ObjectId = require('mongoose').Types.ObjectId;
 
 var { Student } = require('../models/Student');
+var { Course } = require('../models/Course');
 
 var lastScannedRFID = -1;
+var isTakingAttendance = false;
+var takeAttendanceList = [];
+var courseToTakeAttendance = '';
+var studentsHere = [];
 
 router.get('/', (req, res) => {
 
@@ -20,17 +25,99 @@ router.get('/', (req, res) => {
 });
 
 router.post('/rfid', (req, res) => {
-  lastScannedRFID = req.body.RFID;
-  return res.status(200).send();
-})
+  if(isTakingAttendance) {
+    Course.find((err, docs) => {
+      if(!err) {
+        Course.find((err, docs) => {
+          if(!err) {
+            //console.log(docs)
+            var courses = docs
+            for(var i = 0; i < courses.length; i++){
+               if(courses[i].name == courseToTakeAttendance) {
+                 var course = courses[i];
+                 for(var j = 0; j < course.students.length; j++) {
+                   if(req.body.RFID == course.students[j].rfid) {
+                      takeAttendanceList.push(course.students[j]);
+                      console.log(course.students[j])
+                    }
+                 }
+               }
+             }
+          }
+          else
+            console.log('Error in Retriving Courses: ' + JSON.stringify(err, undefined, 2));
+        });
+      }
+      else
+        console.log('Error in Retriving Courses: ' + JSON.stringify(err, undefined, 2));
+    });
+  }
 
-router.get('/rfid', (req, res) => {  
+  else {
+    lastScannedRFID = req.body.RFID;
+  }
+
+  return res.status(200).send();
+
+});
+
+router.get('/rfid', (req, res) => {
   if(lastScannedRFID == -1) {
     console.error('Invalid RFID value of: ', lastScannedRFID);
     res.status(404).send();
   } else {
     return res.status(200).send({rfid: lastScannedRFID});
   }
+});
+
+router.post('/take-attendance', (req, res) => {
+    console.log("taking attendance...")
+    courseToTakeAttendance = req.body.course;
+    isTakingAttendance = true;
+
+    return res.status(200).send();
+});
+
+router.post('/stop-attendance', (req, res) => {
+    console.log("stopping taking attendance...")
+    isTakingAttendance = false;
+
+    Student.find((err, docs) => {
+      if(!err) {
+        for(var i = 0; i < docs.length; i++) {
+          for(var j = 0; j < takeAttendanceList.length; j++) {
+            if(docs[i].rfid == takeAttendanceList[j].rfid) {
+              studentsHere.push(docs[i].name);
+              break;
+            }
+          }
+        }
+      }
+      else
+        console.log('Error in Retriving Students for auth: ' + JSON.stringify(err, undefined, 2));
+
+      var ret = studentsHere;
+      studentsHere = [];
+
+      return res.send(ret);
+    });
+
+    // for(var i = 0; i < takeAttendanceList.length; i++) {
+    //   var query = { 'rfid' : takeAttendanceList[i].rfid };
+    //   Student.findOne(query, function(err, item) {
+    //     if(!item) { }
+    //
+    //     else {
+    //       console.log(item.name);
+    //       studentsHere.push(item.name);
+    //       //return res.send(studentsHere);
+    //     }
+    //
+    //   });
+    // }
+    // return res.send(studentsHere);
+
+    //return res.send(studentsHere);
 });
 
 router.get('/:id', (req, res) => {
