@@ -2,7 +2,7 @@ const express = require('express');
 var router = express.Router();
 var ObjectId = require('mongoose').Types.ObjectId;
 
-var { Student } = require('../models/student');
+var { Student } = require('../models/Student');
 
 router.get('/', (req, res) => {
 

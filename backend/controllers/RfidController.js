@@ -9,7 +9,7 @@ router.post('/', (req, res) => {
 });
 
 router.get('/', (req, res) => {
-  return res.status(200).send({"rfid": mostRecentRfid});
+  return res.status(200).send({"RFID": mostRecentRfid});
 });
 
 module.exports = router;
